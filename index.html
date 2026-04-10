@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Для Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Цвет темы для браузера -->
+    <meta name="theme-color" content="#4285f4">
+
+    <!-- Для iOS (иконка на домашний экран) -->
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+
+    <!-- Для iOS (статус бар) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Заметки (13-18)</title>
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <link rel="icon" href="icons/favicon.ico" sizes="16x16" type="image/ico">
+</head>
+
+<body>
+    <header>
+        <h1>А вот и «Заметки» - наше первое <span class="no-break">оффлайн-приложение</span></h1>
+        <nav class="tabs is-center">
+            <button id="home-btn" class="tab active col-6">Главная</button>
+            <button id="about-btn" class="tab col-6">О приложении</button>
+        </nav>
+    </header>
+
+    <!-- Основной контейнер для динамического контента -->
+    <main id="app-content" class="container" style="margin-top: 2rem;">
+        <!-- Сюда будет загружаться контент -->
+    </main>
+
+    <footer class="is-center" style="margin-top: 2rem; margin-bottom: 2rem;">
+        <button id="enable-push" class="button success">Включить уведомления</button>
+        <button id="disable-push" class="button error" style="display:none;">Отключить уведомления</button>
+    </footer>
+
+    <!-- Socket.IO клиент -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
