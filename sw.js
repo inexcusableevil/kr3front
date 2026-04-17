@@ -1,10 +1,13 @@
-const CACHE_NAME = 'notes-cache-v3';
-const DYNAMIC_CACHE_NAME = 'dynamic-content-v1';
-const ASSETS = [
+const CACHE_NAME = 'notes-cache-v7';
+const APP_SHELL = [
     '/',
     '/index.html',
+    '/styles.css',
     '/app.js',
     '/manifest.json',
+    '/content/home.html',
+    '/content/about.html',
+    '/socket.io/socket.io.js',
     '/icons/favicon.ico',
     '/icons/favicon-16x16.png',
     '/icons/favicon-32x32.png',
@@ -12,101 +15,150 @@ const ASSETS = [
     '/icons/favicon-64x64.png',
     '/icons/favicon-128x128.png',
     '/icons/favicon-256x256.png',
-    '/icons/favicon-512x512.png'
+    '/icons/favicon-512x512.png',
+    '/icons/icon-152x152.png'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS))
+            .then(cache => cache.addAll(APP_SHELL))
             .then(() => self.skipWaiting())
     );
 });
 
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(
-                keys.filter(key => key !== CACHE_NAME && key !== DYNAMIC_CACHE_NAME)
+        caches.keys()
+            .then(keys => Promise.all(
+                keys
+                    .filter(key => key !== CACHE_NAME)
                     .map(key => caches.delete(key))
-            );
-        }).then(() => self.clients.claim())
+            ))
+            .then(() => self.clients.claim())
     );
 });
 
-// Для статики – Cache First, для контента – Network First
 self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
+    if (event.request.method !== 'GET') {
+        return;
+    }
 
-    // Пропускаем запросы к другим источникам (например, к CDN chota)
-    if (url.origin !== location.origin) return;
+    const requestUrl = new URL(event.request.url);
+    const isSameOrigin = requestUrl.origin === self.location.origin;
 
-    // Динамические страницы (content/*) – сначала сеть, затем кэш
-    if (url.pathname.startsWith('/content/')) {
+    if (!isSameOrigin) {
+        return;
+    }
+
+    if (requestUrl.pathname.startsWith('/socket.io/') && requestUrl.pathname !== '/socket.io/socket.io.js') {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
+    if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
-                .then(networkRes => {
-                    // Кэшируем свежий ответ
-                    const resClone = networkRes.clone();
-                    caches.open(DYNAMIC_CACHE_NAME).then(cache => {
-                        cache.put(event.request, resClone);
-                    });
-                    return networkRes;
+                .then(response => {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put('/index.html', copy));
+                    return response;
                 })
-                .catch(() => {
-                    // Если сеть недоступна, берём из кэша (или home как fallback)
-                    return caches.match(event.request)
-                        .then(cached => cached || caches.match('/content/home.html'));
-                })
+                .catch(() => caches.match('/index.html'))
         );
-    } else {
-        // Для статики – Cache First
-        event.respondWith(
-            caches.match(event.request)
-                .then(response => response || fetch(event.request))
-        );
+        return;
     }
+
+    if (requestUrl.pathname.startsWith('/content/')) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    event.respondWith(
+        caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+
+            return fetch(event.request).then(response => {
+                if (!response || response.status !== 200) {
+                    return response;
+                }
+
+                const copy = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+                return response;
+            });
+        })
+    );
 });
 
-// Обработка push-уведомлений
-self.addEventListener('push', (event) => {
-    let data = { title: 'Новое уведомление', body: '', reminderId: null };
+self.addEventListener('push', event => {
+    let data = {
+        title: 'Новое уведомление',
+        body: '',
+        reminderId: null
+    };
+
     if (event.data) {
         data = event.data.json();
     }
+
     const options = {
         body: data.body,
         icon: '/icons/favicon-128x128.png',
         badge: '/icons/favicon-48x48.png',
-        data: { reminderId: data.reminderId } // для идентификации в click
+        data: { reminderId: data.reminderId }
     };
-    // Добавляем кнопку только если это напоминание
+
     if (data.reminderId) {
         options.actions = [
             { action: 'snooze', title: 'Отложить на 5 минут' }
         ];
     }
-    event.waitUntil(
-        self.registration.showNotification(data.title, options)
-    );
+
+    event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// Обработка клика по уведомлению
-self.addEventListener('notificationclick', (event) => {
-    const notification = event.notification;
-    const action = event.action;
+self.addEventListener('notificationclick', event => {
+    const { action, notification } = event;
+    const reminderId = notification.data?.reminderId;
 
-    if (action === 'snooze') {
-        // Получаем id напоминания из данных уведомления
-        const reminderId = notification.data.reminderId;
-        // Отправляем запрос на сервер для откладывания
+    if (action === 'snooze' && reminderId) {
         event.waitUntil(
             fetch(`/snooze?reminderId=${reminderId}`, { method: 'POST' })
                 .then(() => notification.close())
-                .catch(err => console.error('Snooze failed:', err))
+                .catch(error => {
+                    console.error('Snooze failed:', error);
+                    notification.close();
+                })
         );
-    } else {
-        // При клике на само уведомление просто закрываем его
-        notification.close();
+        return;
     }
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            notification.close();
+
+            for (const client of windowClients) {
+                if ('focus' in client) {
+                    return client.focus();
+                }
+            }
+
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+
+            return undefined;
+        })
+    );
 });

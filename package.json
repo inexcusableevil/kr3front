@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "generate-icons": "node generate-icons.js"
+    "check": "node --check app.js && node --check sw.js && node --check server.js"
   },
   "keywords": ["pwa", "notes", "service-worker", "websockets", "push-notifications"],
   "author": "",

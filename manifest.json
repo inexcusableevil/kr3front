@@ -1,12 +1,14 @@
 {
-    "name": "Мои заметки",
-    "short_name": "Заметки",
+    "name": "Менеджер задач PWA",
+    "short_name": "Задачи",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#4285f4",
-    "description": "Простое приложение для заметок, работающее офлайн",
+    "description": "Менеджер задач с офлайн-режимом, App Shell, push-уведомлениями и напоминаниями",
     "orientation": "portrait-primary",
+    "categories": ["productivity", "education"],
     "icons": [
         {
             "src": "icons/favicon-16x16.png",
@@ -36,6 +38,11 @@
         {
             "src": "icons/favicon-256x256.png",
             "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon-152x152.png",
+            "sizes": "152x152",
             "type": "image/png"
         },
         {

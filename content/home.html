@@ -1,16 +1,34 @@
-<div class="home-content">
-    <h2 class="is-center">Добавить заметку</h2>
-    <form id="note-form" class="row is-center">
-        <input class="col-9" type="text" id="note-input" placeholder="Введите текст заметки" required>
-        <button class="col-3 button primary" type="submit">Добавить</button>
-    </form>
+<section class="notes-layout">
+    <div class="panel">
+        <h2>Быстрая заметка</h2>
+        <form id="note-form" class="stack-form">
+            <label class="field-label" for="note-input">Текст заметки</label>
+            <input type="text" id="note-input" placeholder="Например: подготовить отчёт" required>
+            <button class="button primary" type="submit">Добавить заметку</button>
+        </form>
+    </div>
 
-    <form id="reminder-form" class="row is-center" style="margin-top: 1rem;">
-        <input class="col-5" type="text" id="reminder-text" placeholder="Текст напоминания" required>
-        <input class="col-4" type="datetime-local" id="reminder-time" required>
-        <button class="col-3 button success" type="submit">Добавить с напоминанием</button>
-    </form>
+    <div class="panel">
+        <h2>Напоминание</h2>
+        <form id="reminder-form" class="stack-form">
+            <label class="field-label" for="reminder-text">Текст напоминания</label>
+            <input type="text" id="reminder-text" placeholder="Например: созвон с командой" required>
 
-    <h2 class="is-center" style="margin-top: 2rem;">Список заметок</h2>
-    <ul id="notes-list" style="list-style: none; padding-left: 0;"></ul>
-</div>
+            <label class="field-label" for="reminder-time">Дата и время</label>
+            <input type="datetime-local" id="reminder-time" required>
+
+            <button class="button accent" type="submit">Добавить с напоминанием</button>
+        </form>
+    </div>
+</section>
+
+<section class="panel notes-panel">
+    <div class="notes-header">
+        <div>
+            <h2>Список заметок</h2>
+            <p class="muted">Обычные заметки и записи с push-напоминаниями.</p>
+        </div>
+        <button id="clear-notes" class="button ghost" type="button">Очистить всё</button>
+    </div>
+    <ul id="notes-list" class="notes-list"></ul>
+</section>

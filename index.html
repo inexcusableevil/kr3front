@@ -4,46 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Web App Manifest -->
     <link rel="manifest" href="/manifest.json">
-
-    <!-- Для Android -->
     <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- Цвет темы для браузера -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#4285f4">
-
-    <!-- Для iOS (иконка на домашний экран) -->
     <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-
-    <!-- Для iOS (статус бар) -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Заметки (13-18)</title>
-    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
-    <link rel="icon" href="icons/favicon.ico" sizes="16x16" type="image/ico">
+    <meta name="description" content="PWA-приложение для заметок с офлайн-режимом, синхронизацией и push-напоминаниями">
+    <title>Менеджер задач</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/icons/favicon.ico" sizes="16x16" type="image/x-icon">
 </head>
 
 <body>
-    <header>
-        <h1>А вот и «Заметки» - наше первое <span class="no-break">оффлайн-приложение</span></h1>
-        <nav class="tabs is-center">
-            <button id="home-btn" class="tab active col-6">Главная</button>
-            <button id="about-btn" class="tab col-6">О приложении</button>
-        </nav>
-    </header>
+    <div class="page-shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">PWA 13-18</p>
+                <h1>Менеджер задач</h1>
+                <p class="subtitle">Офлайн-заметки, напоминания, WebSocket и push-уведомления в одном приложении.</p>
+            </div>
+            <nav class="tabs" aria-label="Навигация">
+                <button id="home-btn" class="tab active" type="button">Главная</button>
+                <button id="about-btn" class="tab" type="button">О приложении</button>
+            </nav>
+        </header>
 
-    <!-- Основной контейнер для динамического контента -->
-    <main id="app-content" class="container" style="margin-top: 2rem;">
-        <!-- Сюда будет загружаться контент -->
-    </main>
+        <section class="status-grid" aria-label="Статус приложения">
+            <div class="status-card">
+                <span class="status-label">Сеть</span>
+                <strong id="network-status">Проверка...</strong>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Service Worker</span>
+                <strong id="sw-status">Не зарегистрирован</strong>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Push</span>
+                <strong id="push-status">Не подключён</strong>
+            </div>
+        </section>
 
-    <footer class="is-center" style="margin-top: 2rem; margin-bottom: 2rem;">
-        <button id="enable-push" class="button success">Включить уведомления</button>
-        <button id="disable-push" class="button error" style="display:none;">Отключить уведомления</button>
-    </footer>
+        <main id="app-content" class="content-panel" aria-live="polite">
+            <div class="loading-state">Загрузка интерфейса...</div>
+        </main>
 
-    <!-- Socket.IO клиент -->
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <footer class="footer-panel">
+            <div class="push-actions">
+                <button id="app-launch" class="button ghost" type="button" hidden>Установить приложение</button>
+                <button id="enable-push" class="button primary" type="button">Включить уведомления</button>
+                <button id="disable-push" class="button secondary" type="button" hidden>Отключить уведомления</button>
+            </div>
+            <p id="app-message" class="app-message">Приложение готово к работе.</p>
+        </footer>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
 </body>
 
